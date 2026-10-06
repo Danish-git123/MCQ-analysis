@@ -18,8 +18,9 @@ docker compose up --build
 ```
 Navigate to `http://localhost:3000` in your browser to view the frontend. The backend API is available at `http://localhost:8000`.
 
-#### Option 2: Use the pre-built Docker setup
-If you prefer to use the production-ready configuration (which pulls from pre-built configurations if available):
+#### Option 2: Use Pre-built Docker Images
+If you prefer to use pre-built images (e.g., from Docker Hub or GitHub Container Registry), you can use the production compose file. 
+*(Note: You must update `<DOCKERHUB_USERNAME>` in `docker-compose.prod.yml` to the actual registry where the images are hosted first)*.
 ```bash
 docker compose -f docker-compose.prod.yml up -d
 ```
