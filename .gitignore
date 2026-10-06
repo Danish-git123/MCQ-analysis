@@ -1,0 +1,18 @@
+# ---- Secrets ----
+# The real .env with credentials is shared privately and must NEVER be committed
+.env
+
+# ---- Python / backend ----
+backend/.venv/
+backend/__pycache__/
+*.pyc
+backend/scripts/
+
+# ---- Node / frontend ----
+frontend/node_modules/
+frontend/dist/
+
+venv/
+backend/venv/
+.idea/
+.vscode/

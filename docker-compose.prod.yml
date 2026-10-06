@@ -1,0 +1,12 @@
+services:
+  backend:
+    image: <DOCKERHUB_USERNAME>/knowledgetrace-backend:latest
+    env_file: .env
+    ports:
+      - "8000:8000"
+  frontend:
+    image: <DOCKERHUB_USERNAME>/knowledgetrace-frontend:latest
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

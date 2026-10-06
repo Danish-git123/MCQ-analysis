@@ -1,0 +1,2 @@
+# backend/pyrefly.toml
+python-interpreter = "./venv/Scripts/python.exe"

@@ -1,0 +1,7 @@
+{
+  "venvPath": "e:/Demo-MCQ/backend",
+  "venv": "venv",
+  "extraPaths": [
+    "e:/Demo-MCQ/backend"
+  ]
+}
