@@ -18,13 +18,21 @@ docker compose up --build
 ```
 Navigate to `http://localhost:3000` in your browser to view the frontend. The backend API is available at `http://localhost:8000`.
 
-#### Option 2: Use Pre-built Docker Images
-If you prefer to use pre-built images (e.g., from Docker Hub or GitHub Container Registry), you can use the production compose file. 
-*(Note: You must update `<DOCKERHUB_USERNAME>` in `docker-compose.prod.yml` to the actual registry where the images are hosted first)*.
+#### Option 2: Use the pre-built Docker Images
+If you prefer to skip the build process and run without cloning the repository, you can use the pre-built images.
+
+**1. Run the Backend API**
+Since the backend requires a database, you must provide your Supabase connection string:
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker run -d -p 8000:8000 -e DATABASE_URL="postgresql+asyncpg://USER:PASSWORD@HOST.supabase.co:5432/postgres" -e SECRET_KEY="your_secret_key" danish1922/knowledgetrace-backend:latest
 ```
-Navigate to `http://localhost:3000` in your browser.
+
+**2. Run the Frontend UI**
+Now start the frontend:
+```bash
+docker run -d -p 3000:80 danish/knowledgetrace-frontend:latest
+```
+Just like before, navigate to `http://localhost:3000` in your browser.
 
 ---
 
