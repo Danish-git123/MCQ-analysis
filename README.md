@@ -21,16 +21,22 @@ Navigate to `http://localhost:3000` in your browser to view the frontend. The ba
 #### Option 2: Use the pre-built Docker Images
 If you prefer to skip the build process and run without cloning the repository, you can use the pre-built images.
 
-**1. Run the Backend API**
-Since the backend requires a database, you must provide your Supabase connection string:
+**1. Create a Docker Network**
+Both containers need to communicate with each other. Run this once:
 ```bash
-docker run -d -p 8000:8000 -e DATABASE_URL="postgresql+asyncpg://USER:PASSWORD@HOST.supabase.co:5432/postgres" -e SECRET_KEY="your_secret_key" danish1922/knowledgetrace-backend:latest
+docker network create mcq-net
 ```
 
-**2. Run the Frontend UI**
-Now start the frontend:
+**2. Run the Backend API**
+Since the backend requires a database, you must provide your Supabase connection string. Notice we are naming this container `backend` and attaching it to our network:
 ```bash
-docker run -d -p 3000:80 danish/knowledgetrace-frontend:latest
+docker run -d --network mcq-net --name backend -p 8000:8000 -e DATABASE_URL="postgresql+asyncpg://USER:PASSWORD@HOST.supabase.co:5432/postgres" -e SECRET_KEY="your_secret_key" danish1922/knowledgetrace-backend:latest
+```
+
+**3. Run the Frontend UI**
+Now start the frontend on the same network:
+```bash
+docker run -d --network mcq-net -p 3000:80 danish1922/knowledgetrace-frontend:latest
 ```
 Just like before, navigate to `http://localhost:3000` in your browser.
 
