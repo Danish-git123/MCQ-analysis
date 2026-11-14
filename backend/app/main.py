@@ -5,7 +5,7 @@ import contextlib
 import logging
 
 from .database import engine, Base
-from .routers import auth, teacher, student, concepts, mastery, diagnosis
+from .routers import auth, teacher, student, concepts, mastery, diagnosis, agent
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,6 +47,7 @@ app.include_router(student.router)
 app.include_router(concepts.router)
 app.include_router(mastery.router)
 app.include_router(diagnosis.router)
+app.include_router(agent.router)
 
 @app.get("/")
 def read_root():

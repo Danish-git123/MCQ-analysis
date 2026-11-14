@@ -157,3 +157,74 @@ async def get_concept_graph_data(db: AsyncSession) -> Dict[str, Any]:
         "nodes": nodes_list,
         "edges": edges_list
     }
+
+
+async def create_manual_concept_edge(
+    from_concept_id: int,
+    to_concept_id: int,
+    confidence: float,
+    db: AsyncSession,
+) -> Dict[str, Any]:
+    """
+    Manually link Prerequisite (from_concept_id) -> Dependent (to_concept_id),
+    enforcing strict Directed Acyclic Graph (DAG) validity with NetworkX.
+    """
+    if from_concept_id == to_concept_id:
+        raise ValueError("A concept cannot be a prerequisite of itself.")
+
+    c_res = await db.execute(select(Concept))
+    concepts = {c.id: c for c in c_res.scalars().all()}
+    if from_concept_id not in concepts or to_concept_id not in concepts:
+        raise ValueError("One or both selected concepts do not exist.")
+
+    e_res = await db.execute(select(ConceptEdge))
+    existing_edges = e_res.scalars().all()
+
+    G = nx.DiGraph()
+    for cid in concepts.keys():
+        G.add_node(cid)
+    for e in existing_edges:
+        if e.from_concept_id == from_concept_id and e.to_concept_id == to_concept_id:
+            raise ValueError(
+                f"Edge '{concepts[from_concept_id].name} -> {concepts[to_concept_id].name}' already exists."
+            )
+        G.add_edge(e.from_concept_id, e.to_concept_id)
+
+    G.add_edge(from_concept_id, to_concept_id)
+    if not nx.is_directed_acyclic_graph(G):
+        raise ValueError(
+            f"Cycle rejected by NetworkX: adding '{concepts[from_concept_id].name} -> "
+            f"{concepts[to_concept_id].name}' creates a circular prerequisite dependency."
+        )
+
+    clamped_conf = max(0.1, min(1.0, float(confidence or 1.0)))
+    new_edge = ConceptEdge(
+        from_concept_id=from_concept_id,
+        to_concept_id=to_concept_id,
+        confidence=clamped_conf,
+        source="manual",
+    )
+    db.add(new_edge)
+    await db.commit()
+    await db.refresh(new_edge)
+
+    return {
+        "id": new_edge.id,
+        "from_concept_id": new_edge.from_concept_id,
+        "from_concept_name": concepts[from_concept_id].name,
+        "to_concept_id": new_edge.to_concept_id,
+        "to_concept_name": concepts[to_concept_id].name,
+        "confidence": new_edge.confidence,
+        "source": new_edge.source,
+    }
+
+
+async def delete_concept_edge(edge_id: int, db: AsyncSession) -> Dict[str, Any]:
+    stmt = select(ConceptEdge).where(ConceptEdge.id == edge_id)
+    res = await db.execute(stmt)
+    edge = res.scalars().first()
+    if not edge:
+        raise ValueError(f"Prerequisite edge #{edge_id} not found.")
+    await db.delete(edge)
+    await db.commit()
+    return {"status": "deleted", "edge_id": edge_id}

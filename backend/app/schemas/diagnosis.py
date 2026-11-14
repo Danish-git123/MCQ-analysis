@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 
@@ -16,3 +16,32 @@ class CognitiveDiagnosisProfileRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class RoadmapStep(BaseModel):
+    step: int
+    concept_id: int
+    concept_name: str
+    current_mastery: float
+    confidence_score: float
+    is_root_blocker: bool
+    unlocks_topics: List[str]
+    action_priority: str
+
+
+class PrerequisiteDebtReport(BaseModel):
+    debt_score: float
+    debt_level: str
+    debt_advice: str
+    remediation_roadmap: List[RoadmapStep]
+
+
+class AnomalyAnalysisResponse(BaseModel):
+    student_id: int
+    question_id: int
+    is_correct: bool
+    predicted_probability: float
+    standardized_residual: float
+    anomaly_type: str
+    pedagogical_message: str
+    feature_breakdown: Dict[str, Any]

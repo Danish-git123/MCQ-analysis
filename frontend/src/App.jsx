@@ -81,6 +81,7 @@ export default function App() {
             <Route path="/teacher" element={<ProtectedRoute allowedRole="teacher"><TeacherDashboard /></ProtectedRoute>} />
             <Route path="/teacher/create-test" element={<ProtectedRoute allowedRole="teacher"><TestBuilder /></ProtectedRoute>} />
             <Route path="/teacher/test/:id/results" element={<ProtectedRoute allowedRole="teacher"><TestResults /></ProtectedRoute>} />
+            <Route path="/teacher/student/:studentId/diagnosis" element={<ProtectedRoute allowedRole="teacher"><DiagnosticReport /></ProtectedRoute>} />
             
             {/* Student Routes */}
             <Route path="/student" element={<ProtectedRoute allowedRole="student"><StudentDashboard /></ProtectedRoute>} />

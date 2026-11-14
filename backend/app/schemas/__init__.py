@@ -10,7 +10,7 @@ continue to work without modification.
 from .user import UserBase, UserCreate, UserRead, Token, TokenData
 
 # Concepts
-from .concept import ConceptBase, ConceptCreate, ConceptRead
+from .concept import ConceptBase, ConceptCreate, ConceptRead, ConceptEdgeCreate
 
 # Questions & Options
 from .question import (

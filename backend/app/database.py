@@ -6,6 +6,10 @@ DATABASE_URL = settings.DATABASE_URL
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is missing. Please check your .env file.")
 
+# Ensure asyncpg driver is used for asynchronous SQLAlchemy
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 # Robust async engine configuration for Supabase PostgreSQL
 engine = create_async_engine(
     DATABASE_URL,

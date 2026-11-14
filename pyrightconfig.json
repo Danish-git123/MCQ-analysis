@@ -1,7 +1,24 @@
 {
-  "venvPath": "e:/Demo-MCQ/backend",
-  "venv": "venv",
-  "extraPaths": [
-    "e:/Demo-MCQ/backend"
+  "venvPath": ".",
+  "venv": ".venv",
+  "exclude": [
+    "**/.venv",
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "backend",
+      "extraPaths": [
+        "./backend",
+        "./backend/.venv/Lib/site-packages"
+      ]
+    },
+    {
+      "root": ".",
+      "extraPaths": [
+        "."
+      ]
+    }
   ]
 }

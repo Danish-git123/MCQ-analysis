@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
 
-    # App Config
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # App Config - search both current directory and parent directory for .env
+    model_config = SettingsConfigDict(env_file=(".env", "../.env"), extra="ignore")
 
 settings = Settings()

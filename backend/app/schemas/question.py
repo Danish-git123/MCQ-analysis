@@ -25,6 +25,7 @@ class QuestionBase(BaseModel):
 
 class QuestionCreate(QuestionBase):
     options: List[OptionCreate]
+    skill_ids: List[int] = []
 
 
 class QuestionRead(QuestionBase):

@@ -154,6 +154,7 @@ class DINADiagnosisService:
                 p = CognitiveDiagnosisProfile(
                     student_id=student_id,
                     concept_id=c_id,
+                    raw_mastery_p=p_post,
                     adjusted_mastery=p_post,
                     confidence_score=confidence,
                     reliability_tier=tier,

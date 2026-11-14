@@ -15,3 +15,9 @@ class ConceptRead(ConceptBase):
 
     class Config:
         from_attributes = True
+
+
+class ConceptEdgeCreate(BaseModel):
+    from_concept_id: int
+    to_concept_id: int
+    confidence: float = 1.0

@@ -49,12 +49,33 @@ class PYBKTMasteryEstimator(BaseMasteryEstimator):
         self.p_slip = p_slip
         self.p_guess = p_guess
 
-    def compute_bkt_sequence(self, responses_is_correct: List[bool]) -> float:
+    def compute_bkt_sequence(
+        self,
+        responses_is_correct: List[bool],
+        timestamps: Optional[List[Any]] = None,
+        forgetting_rate_per_day: float = 0.04,
+    ) -> float:
         """
         Calculates p(mastery) for a sequence of true/false responses in chronological order.
+        Optionally incorporates temporal forgetting decay (BKT-Forget, Eq. 19) when
+        elapsed time between attempts exceeds 24 hours.
         """
         p_curr = self.p_init
-        for is_correct in responses_is_correct:
+        prev_ts = None
+        for idx, is_correct in enumerate(responses_is_correct):
+            # Apply temporal decay if timestamps are provided and gap > 1 day
+            if timestamps and idx < len(timestamps) and timestamps[idx] is not None and prev_ts is not None:
+                try:
+                    gap_days = max(0.0, (timestamps[idx] - prev_ts).total_seconds() / 86400.0)
+                    if gap_days > 1.0:
+                        delta = min(0.35, forgetting_rate_per_day * (gap_days - 1.0))
+                        # Eq. (19): P(K_t) = (1 - delta) * P(K_{t-1}) + delta * p_init
+                        p_curr = (1.0 - delta) * p_curr + delta * self.p_init
+                except Exception:
+                    pass
+            if timestamps and idx < len(timestamps):
+                prev_ts = timestamps[idx]
+
             if is_correct:
                 # Observation = Correct
                 p_obs = (p_curr * (1 - self.p_slip)) / (p_curr * (1 - self.p_slip) + (1 - p_curr) * self.p_guess)
@@ -70,23 +91,25 @@ class PYBKTMasteryEstimator(BaseMasteryEstimator):
     async def update_mastery(self, student_id: int, concept_id: int, db: AsyncSession) -> float:
         """
         Fetch all historical responses for this student and concept in chronological order,
-        run pyBKT algorithm, and persist updated mastery to student_concept_mastery table.
+        run pyBKT algorithm with temporal forgetting decay, and persist updated mastery.
         """
         stmt = (
-            select(Response.is_correct)
+            select(Response.is_correct, Response.answered_at)
             .join(Question, Response.question_id == Question.id)
             .where(Response.student_id == student_id, Question.concept_id == concept_id)
             .order_by(Response.answered_at.asc())
         )
         res = await db.execute(stmt)
-        responses = res.scalars().all()
+        rows = res.all()
 
-        if not responses:
+        if not rows:
             new_p = self.p_init
             opp_count = 0
         else:
-            new_p = self.compute_bkt_sequence(responses)
-            opp_count = len(responses)
+            responses = [r[0] for r in rows]
+            timestamps = [r[1] for r in rows]
+            new_p = self.compute_bkt_sequence(responses, timestamps=timestamps)
+            opp_count = len(rows)
 
         # Check existing record in DB
         mastery_stmt = select(StudentConceptMastery).where(
